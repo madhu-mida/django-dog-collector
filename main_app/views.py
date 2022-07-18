@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Dog
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from .forms import FeedingForm
 
 
 # Create your views here.
@@ -37,7 +38,28 @@ def dogs_index(request):
 
 def dogs_detail(request, dog_id):
     dog = Dog.objects.get(id=dog_id)
-    return render(request, 'dogs/detail.html', {'dog': dog})
+    # instantiate FeedingForm to be rendered in the template
+    feeding_form = FeedingForm()
+    return render(request, 'dogs/detail.html', {'dog': dog, 'feeding_form': feeding_form})
+
+# add this new function below dogs_detail
+
+
+def add_feeding(request, dog_id):
+    pass
+
+
+def add_feeding(request, dog_id):
+    # create the ModelForm using the data in request.POST
+    form = FeedingForm(request.POST)
+    # validate the form
+    if form.is_valid():
+        # don't save the form to the db until it
+        # has the dog_id assigned
+        new_feeding = form.save(commit=False)
+        new_feeding.dog_id = dog_id
+        new_feeding.save()
+    return redirect('detail', dog_id=dog_id)
 
 
 class DogCreate(CreateView):
